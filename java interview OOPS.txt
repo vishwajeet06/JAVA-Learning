@@ -1,0 +1,12 @@
+1. OPPs in java ?
+=> It Stands for object oriented programming a programming paradigm.
+   It  works around the concept of objects , which can contain data in the form of fields(attribute or properties) and code in the form of methods.
+
+
+2. Key concept of OOPs?
+=>  1. Class and object (blueprint)
+    2. Encapsulation(bundling data and methods along with hiding internal state of object and exposing necessary functionality through methods)
+    3. Inheritance (allows class to inherit properties/behaviors from other class)(super/parent)
+    4. Polymorphism (allows object sof different classes to be treated as objects of common superclass and enables mothod to be overiden in subclasses, providing different inplN)
+    5. Abstraction (process of hiding the implementation details and showing only essential features of abject)
+
