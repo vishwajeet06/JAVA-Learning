@@ -22,3 +22,19 @@ Here are the main reasons:
 * Inheritance and Polymorphism: The power of interfaces lies in their ability to allow different classes to implement the same set of methods in their own way, promoting polymorphism. Declaring a method as final would prevent a class from providing its own implementation, thus defeating the purpose of using interfaces.
 
 * Default Methods: Since Java 8, interfaces can have default methods. These are methods with a default implementation. However, even default methods are not final because they can still be overridden by implementing classes.
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+
+Ques => what is the purpose of providing final keyword to a method ?
+Ans => The final keyword in Java can be applied to classes, methods, and variables. When applied to methods, its primary purpose is to prevent the method from being overridden in subclasses. This can be useful for several reasons:
+
+ **Preserve Implementation Integrity: If a method's implementation is critical to the class's functionality and should not be altered, marking it as final ensures that it remains unchanged in any subclass. This can help maintain the integrity and correct functioning of the class.
+
+ **Enhance Security: In some cases, you may want to ensure that certain methods cannot be modified to enhance security. By marking these methods as final, you can prevent subclasses from altering their behavior.
+
+ **Improve Performance: The Java compiler and the Java Virtual Machine (JVM) can optimize calls to final methods more effectively than calls to non-final methods. This is because the compiler knows that the method cannot be overridden, allowing for more efficient method invocation.
+
+ **Design Clarity: Using final can make the design of a class clearer. It explicitly communicates to other developers that the method is not intended to be overridden, which can help in understanding the class's intended usage.
+
+-----------------------------------------------------------------------------------------------------------------------------
