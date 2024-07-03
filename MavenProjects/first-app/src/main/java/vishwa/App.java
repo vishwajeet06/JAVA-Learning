@@ -1,0 +1,150 @@
+package vishwa;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+/**
+ * Hello world!
+ *
+ */
+public class App 
+{
+    public static void main(String[] args) {
+        // giving input output data Excel sheet
+
+        String inputFile = "Dummy.xlsx"; //input
+        String outputFile = "Combined1.xlsx"; //output
+
+        try (FileInputStream file = new FileInputStream(inputFile);
+                Workbook workbook = new XSSFWorkbook(file)) {
+
+            // reading data from sheets
+            Map<String, Map<String, Object>> mainData = readSheetData(workbook, "MAIN");
+            Map<String, Map<String, Object>> amData = readSheetData(workbook, "AM");
+            Map<String, Map<String, Object>> mjData = readSheetData(workbook, "MJ");
+
+            // combining the data
+            Map<String, Map<String, Object>> combinedData = new HashMap<>();
+
+            for (String id : mainData.keySet()) {
+                Map<String, Object> combinedRow = new HashMap<>(mainData.get(id));
+
+                // Add AM data
+                if (amData.containsKey(id)) {
+                    combinedRow.put("Apr_AM", amData.get(id).get("Apr"));
+                    combinedRow.put("May_AM", amData.get(id).get("May"));
+                } else {
+                    combinedRow.put("Apr_AM", null);
+                    combinedRow.put("May_AM", null);
+                }
+
+                // Add MJ data (only Jun)
+                if (mjData.containsKey(id)) {
+                    combinedRow.put("Jun_MJ", mjData.get(id).get("Jun"));
+                } else {
+                    combinedRow.put("Jun_MJ", null);
+                }
+                combinedData.put(id, combinedRow);
+            }
+
+            // combined data to new excel file
+            try (Workbook outputWorkbook = new XSSFWorkbook()) {
+                Sheet outputSheet = outputWorkbook.createSheet("Combined");
+
+                // write headers
+                Row headerRow = outputSheet.createRow(0);
+                String[] headers = { "ID", "Apr", "May", "Jun", "Apr_AM", "May_AM", "Jun_MJ" };
+                // header name
+                for (int i = 0; i < headers.length; i++) {
+                    headerRow.createCell(i).setCellValue(headers[i]);
+                }
+
+                // int cellIndex = 0;
+                // for (String key : combinedData.values().iterator().next().keySet()) {
+                //     headerRow.createCell(cellIndex++).setCellValue(key);
+                // }
+
+                // write data rows
+                int rowIndex = 1;
+                for (String id : combinedData.keySet()) {
+                    Row row = outputSheet.createRow(rowIndex++);
+                    Map<String, Object> rowData = combinedData.get(id);
+
+                    row.createCell(0).setCellValue(id);
+                    setCellValue(row.createCell(1), rowData.get("Apr"));
+                    setCellValue(row.createCell(2), rowData.get("May"));
+                    setCellValue(row.createCell(3), rowData.get("Jun"));
+                    setCellValue(row.createCell(4), rowData.get("Apr_AM"));
+                    setCellValue(row.createCell(5), rowData.get("May_AM"));
+                    setCellValue(row.createCell(6), rowData.get("Jun_MJ"));
+                }
+
+                // saving output file
+                try (FileOutputStream fileOut = new FileOutputStream(outputFile)) {
+                    outputWorkbook.write(fileOut);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    private static void setCellValue(Cell cell, Object value) {
+        if (value == null) {
+            cell.setBlank();
+        } else if (value instanceof String) {
+            cell.setCellValue((String) value);
+        } else if (value instanceof Double) {
+            cell.setCellValue((Double) value);
+        } else if (value instanceof Boolean) {
+            cell.setCellValue((Boolean) value);
+        } else {
+            cell.setCellValue(value.toString());
+        }
+    }
+    
+    private static Map<String, Map<String, Object>> readSheetData(Workbook workbook, String sheetName) {
+        Map<String, Map<String, Object>> data = new HashMap<>();
+        Sheet sheet = workbook.getSheet(sheetName);
+        if (sheet == null) {
+            return data;
+        }
+
+        Row headerRow = sheet.getRow(0);
+        int numColumns = headerRow.getLastCellNum();
+
+        for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+            Row row = sheet.getRow(i);
+            if (row == null) continue;
+
+            String id = row.getCell(0).getStringCellValue();
+            Map<String, Object> rowData = new HashMap<>();
+            for (int j = 0; j < numColumns; j++) {
+                Cell cell = row.getCell(j);
+                String header = headerRow.getCell(j).getStringCellValue();
+                if (cell != null) {
+                    switch (cell.getCellType()) {
+                        case STRING:
+                            rowData.put(header, cell.getStringCellValue());
+                            break;
+                        case NUMERIC:
+                            rowData.put(header, cell.getNumericCellValue());
+                            break;
+                    }
+                }
+            }
+            data.put(id, rowData);
+        }
+
+        return data;
+    }
+    
+}
